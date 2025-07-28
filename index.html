@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Practice App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
     <style>
         * {
             margin: 0;
@@ -92,6 +94,7 @@
             border: 1px solid #ddd;
             border-radius: 10px;
         }
+
         .multiplication-table {
             width: 100%;
             border-collapse: collapse;
@@ -123,21 +126,137 @@
             background-color: #e3f2fd;
         }
 
-        /* Practice Area */
+        /* Practice Area Styles */
         .practice-container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
+        }
+
+        .practice-categories h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+
+        .category-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .category-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 30px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .category-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .category-btn small {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-top: 8px;
+            font-weight: normal;
+        }
+
+        /* Practice Session Styles */
+        .practice-session {
             text-align: center;
         }
 
-        .problem-display {
+        .practice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
             background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .timer-display {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .problem-display {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 3px solid #667eea;
             border-radius: 15px;
             padding: 40px;
-            margin: 30px 0;
-            font-size: 2rem;
+            margin: 25px 0;
+            font-size: 1.8rem;
             font-weight: bold;
             color: #333;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .problem-display .katex {
+            font-size: 1.5em;
+        }
+
+        .question-label {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
         }
 
         .answer-input {
@@ -148,11 +267,13 @@
             border-radius: 10px;
             text-align: center;
             margin: 20px 10px;
+            transition: border-color 0.3s ease;
         }
 
         .answer-input:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
         }
 
         .btn {
@@ -165,6 +286,7 @@
             cursor: pointer;
             margin: 10px;
             transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
 
         .btn:hover {
@@ -172,79 +294,67 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .feedback {
             margin: 20px 0;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
             font-size: 1.2rem;
             font-weight: bold;
+            border: 2px solid;
         }
 
-        .correct {
+        .feedback.correct {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border-color: #c3e6cb;
         }
 
-        .incorrect {
+        .feedback.incorrect {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .score {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            font-size: 1.1rem;
+            border-color: #f5c6cb;
         }
 
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
+                padding: 15px;
             }
 
             .header h1 {
                 font-size: 2rem;
             }
 
-            .nav-buttons {
+            .practice-header {
+                flex-direction: column;
                 gap: 10px;
+                text-align: center;
             }
 
-            .nav-btn {
-                padding: 10px 15px;
-                font-size: 14px;
-            }
-
-            .page {
-                padding: 20px;
-            }
-
-            .page h2 {
-                font-size: 1.5rem;
-            }
-
-            .multiplication-table {
-                font-size: 12px;
-            }
-
-            .multiplication-table th,
-            .multiplication-table td {
-                padding: 8px;
+            .category-buttons {
+                grid-template-columns: 1fr;
             }
 
             .problem-display {
-                padding: 20px;
-                font-size: 1.5rem;
+                padding: 25px;
+                font-size: 1.6rem;
             }
 
             .answer-input {
-                width: 150px;
-                padding: 10px;
-                font-size: 1.2rem;
+                width: 180px;
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                font-size: 1rem;
             }
         }
 
@@ -259,13 +369,14 @@
                 max-width: 250px;
             }
 
-            .multiples-grid {
-                grid-template-columns: repeat(4, 1fr);
+            .answer-input {
+                width: 150px;
+                margin: 10px 5px;
             }
 
-            .answer-input {
-                width: 120px;
-                margin: 10px 5px;
+            .problem-display {
+                font-size: 1.4rem;
+                padding: 20px;
             }
         }
     </style>
@@ -286,7 +397,7 @@
 
         <!-- Multiples of 2 Page -->
         <div id="multiples" class="page active">
-            <h2>Multiples of 2 (1-200)</h2>
+            <h2>Multiples of 2 (1-100)</h2>
             <div class="table-container">
                 <table class="multiplication-table" id="multiplesTable"></table>
             </div>
@@ -312,33 +423,67 @@
         <div id="practice" class="page">
             <h2>Practice Area</h2>
             <div class="practice-container">
-                <div class="score">
-                    <strong>Score: <span id="score">0</span> / <span id="totalQuestions">0</span></strong>
-                    <span style="margin-left: 20px;">Accuracy: <span id="accuracy">0%</span></span>
+                <!-- Practice Category Selection -->
+                <div class="practice-categories" id="practiceCategories">
+                    <h3>Choose Your Practice Type:</h3>
+                    <div class="category-buttons">
+                        <button class="category-btn" onclick="selectPracticeType('simplification')">
+                            🧮 Complex Simplification<br>
+                            <small>BODMAS, exponentials, square roots, cube roots</small>
+                        </button>
+                        <button class="category-btn" onclick="selectPracticeType('multiples2')">
+                            ✖️ Multiples of 2<br>
+                            <small>Practice multiplication by 2</small>
+                        </button>
+                        <button class="category-btn" onclick="selectPracticeType('squaresCubes')">
+                            🔢 Squares & Cubes<br>
+                            <small>Practice squares and cubes calculation</small>
+                        </button>
+                    </div>
                 </div>
-                
-                <div class="problem-display" id="problemDisplay">
-                    Click "Next Problem" to start!
+
+                <!-- Practice Session Area -->
+                <div class="practice-session" id="practiceSession" style="display: none;">
+                    <div class="practice-header">
+                        <button class="back-btn" onclick="backToCategories()">↩ Back</button>
+                        <h3 id="currentPracticeType">Practice</h3>
+                        <div class="score-display">
+                            Score: <span id="score">0</span>/<span id="totalQuestions">0</span> 
+                            (<span id="accuracy">0%</span>)
+                        </div>
+                    </div>
+
+                    <div class="timer-display">
+                        ⏱️ Time: <span id="currentTimer">0.0s</span>
+                    </div>
+                    
+                    <div class="problem-display" id="problemDisplay">
+                        Ready to start? Click the button below!
+                    </div>
+                    
+                    <input type="number" id="answerInput" class="answer-input" placeholder="Your answer" style="display: none;">
+                    
+                    <div>
+                        <button class="btn" onclick="checkAnswer()" id="checkBtn" style="display: none;">Submit Answer</button>
+                        <button class="btn" onclick="nextProblem()" id="nextBtn">Start Practice</button>
+                    </div>
+                    
+                    <div id="feedback" class="feedback" style="display: none;"></div>
                 </div>
-                
-                <input type="number" id="answerInput" class="answer-input" placeholder="Your answer" style="display: none;">
-                
-                <div>
-                    <button class="btn" onclick="checkAnswer()" id="checkBtn" style="display: none;">Check Answer</button>
-                    <button class="btn" onclick="nextProblem()" id="nextBtn">Next Problem</button>
-                </div>
-                
-                <div id="feedback" class="feedback" style="display: none;"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables for practice
+        // Global variables
         let currentProblem = {};
         let score = 0;
         let totalQuestions = 0;
         let answered = false;
+        let currentPracticeType = '';
+        let questionStartTime = 0;
+        let currentQuestionTime = 0;
+        let timerInterval = null;
 
         // Initialize the app
         function init() {
@@ -347,7 +492,6 @@
             generateSquaresCubesTable();
         }
 
-        // Show specific page
         function showPage(pageId) {
             // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
@@ -430,88 +574,241 @@
             }
         }
 
-        // Generate random practice problem
+        // Select practice type
+        function selectPracticeType(type) {
+            currentPracticeType = type;
+            document.getElementById('practiceCategories').style.display = 'none';
+            document.getElementById('practiceSession').style.display = 'block';
+            
+            // Set practice type title
+            const titles = {
+                'simplification': '🧮 Complex Simplification Practice',
+                'multiples2': '✖️ Multiples of 2 Practice', 
+                'squaresCubes': '🔢 Squares & Cubes Practice'
+            };
+            document.getElementById('currentPracticeType').textContent = titles[type];
+            
+            resetPracticeStats();
+        }
+
+        // Back to categories
+        function backToCategories() {
+            stopTimer();
+            document.getElementById('practiceCategories').style.display = 'block';
+            document.getElementById('practiceSession').style.display = 'none';
+        }
+
+        // Reset practice statistics
+        function resetPracticeStats() {
+            score = 0;
+            totalQuestions = 0;
+            answered = false;
+            updateScore();
+            document.getElementById('problemDisplay').textContent = 'Ready to start? Click the button below!';
+            document.getElementById('answerInput').style.display = 'none';
+            document.getElementById('checkBtn').style.display = 'none';
+            document.getElementById('nextBtn').textContent = 'Start Practice';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('currentTimer').textContent = '0.0s';
+        }
+
+        // Start timer
+        function startTimer() {
+            questionStartTime = Date.now();
+            currentQuestionTime = 0;
+            
+            timerInterval = setInterval(() => {
+                currentQuestionTime = (Date.now() - questionStartTime) / 1000;
+                document.getElementById('currentTimer').textContent = currentQuestionTime.toFixed(1) + 's';
+            }, 100);
+        }
+
+        // Stop timer
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // Generate practice problem
         function generateProblem() {
-            const types = ['addition3', 'subtraction3', 'addition4', 'subtraction4', 'multiplication2'];
-            const type = types[Math.floor(Math.random() * types.length)];
+            let answer, display, questionNumber;
             
-            let num1, num2, answer, operation, display;
-            
-            switch (type) {
-                case 'addition3':
-                    num1 = Math.floor(Math.random() * 900) + 100; // 3-digit
-                    num2 = Math.floor(Math.random() * 900) + 100; // 3-digit
-                    answer = num1 + num2;
-                    operation = '+';
+            switch (currentPracticeType) {
+                case 'simplification':
+                    const types = ['bodmas_complex', 'exponential_roots', 'fraction_powers', 'nested_operations', 'mixed_advanced'];
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    questionNumber = totalQuestions + 1;
+                    
+                    switch (type) {
+                        case 'bodmas_complex':
+                            // Complex BODMAS: (a² + b) × c - √d ÷ e
+                            let a = Math.floor(Math.random() * 6) + 2; // 2-7
+                            let b = Math.floor(Math.random() * 15) + 5; // 5-19
+                            let c = Math.floor(Math.random() * 4) + 2; // 2-5
+                            let perfectSqrs = [16, 25, 36, 49, 64, 81, 100];
+                            let d = perfectSqrs[Math.floor(Math.random() * perfectSqrs.length)];
+                            let e = Math.floor(Math.random() * 3) + 2; // 2-4
+                            answer = (a * a + b) * c - Math.sqrt(d) / e;
+                            display = `\\text{Q.${questionNumber} Simplify: } (${a}^2 + ${b}) \\times ${c} - \\frac{\\sqrt{${d}}}{${e}}`;
+                            break;
+                            
+                        case 'exponential_roots':
+                            // 3³ + 2⁴ - ∛125
+                            let base1 = Math.floor(Math.random() * 3) + 3; // 3-5
+                            let exp1 = Math.floor(Math.random() * 2) + 2; // 2-3
+                            let base2 = Math.floor(Math.random() * 3) + 2; // 2-4
+                            let exp2 = Math.floor(Math.random() * 2) + 3; // 3-4
+                            let cubes = [8, 27, 64, 125];
+                            let cubeVal = cubes[Math.floor(Math.random() * cubes.length)];
+                            answer = Math.pow(base1, exp1) + Math.pow(base2, exp2) - Math.cbrt(cubeVal);
+                            display = `\\text{Q.${questionNumber} Calculate: } ${base1}^{${exp1}} + ${base2}^{${exp2}} - \\sqrt[3]{${cubeVal}}`;
+                            break;
+                            
+                        case 'fraction_powers':
+                            // (√36 + 2³) ÷ (4² - 12)
+                            let sqrts = [9, 16, 25, 36, 49];
+                            let sqrt1 = sqrts[Math.floor(Math.random() * sqrts.length)];
+                            let base3 = Math.floor(Math.random() * 3) + 2; // 2-4
+                            let exp3 = Math.floor(Math.random() * 2) + 2; // 2-3
+                            let base4 = Math.floor(Math.random() * 3) + 4; // 4-6
+                            let subtract = Math.floor(Math.random() * 15) + 8; // 8-22
+                            let numerator = Math.sqrt(sqrt1) + Math.pow(base3, exp3);
+                            let denominator = base4 * base4 - subtract;
+                            if (denominator <= 0) denominator = 10; // prevent division by zero or negative
+                            answer = numerator / denominator;
+                            display = `\\text{Q.${questionNumber} Simplify: } \\frac{\\sqrt{${sqrt1}} + ${base3}^{${exp3}}}{${base4}^2 - ${subtract}}`;
+                            break;
+                            
+                        case 'nested_operations':
+                            // 2 × (3² + √64) - (5³ ÷ 25)
+                            let mult = Math.floor(Math.random() * 3) + 2; // 2-4
+                            let base5 = Math.floor(Math.random() * 3) + 3; // 3-5
+                            let squares = [16, 25, 36, 49, 64];
+                            let sqrt2 = squares[Math.floor(Math.random() * squares.length)];
+                            let base6 = Math.floor(Math.random() * 3) + 3; // 3-5
+                            let divisor = Math.floor(Math.random() * 10) + 5; // 5-14
+                            let part1 = mult * (base5 * base5 + Math.sqrt(sqrt2));
+                            let part2 = (base6 * base6 * base6) / divisor;
+                            answer = part1 - part2;
+                            display = `\\text{Q.${questionNumber} Calculate: } ${mult} \\times (${base5}^2 + \\sqrt{${sqrt2}}) - \\frac{${base6}^3}{${divisor}}`;
+                            break;
+                            
+                        case 'mixed_advanced':
+                            // ∛216 + 4² × 3 - √(5² + 24)
+                            let cubes2 = [27, 64, 125];
+                            let cube2 = cubes2[Math.floor(Math.random() * cubes2.length)];
+                            let base7 = Math.floor(Math.random() * 3) + 3; // 3-5
+                            let mult2 = Math.floor(Math.random() * 3) + 2; // 2-4
+                            let base8 = Math.floor(Math.random() * 3) + 3; // 3-5
+                            let add = Math.floor(Math.random() * 20) + 15; // 15-34
+                            let sqrtContent = base8 * base8 + add;
+                            // Find nearest perfect square for simplicity
+                            let perfectSqrt = Math.round(Math.sqrt(sqrtContent));
+                            sqrtContent = perfectSqrt * perfectSqrt;
+                            answer = Math.cbrt(cube2) + base7 * base7 * mult2 - perfectSqrt;
+                            display = `\\text{Q.${questionNumber} Solve: } \\sqrt[3]{${cube2}} + ${base7}^2 \\times ${mult2} - \\sqrt{${sqrtContent}}`;
+                            break;
+                    }
                     break;
-                case 'subtraction3':
-                    num1 = Math.floor(Math.random() * 900) + 100; // 3-digit
-                    num2 = Math.floor(Math.random() * num1); // Ensure positive result
-                    answer = num1 - num2;
-                    operation = '-';
+                    
+                case 'multiples2':
+                    questionNumber = totalQuestions + 1;
+                    let num1 = Math.floor(Math.random() * 100) + 1;
+                    answer = num1 * 2;
+                    display = `\\text{Q.${questionNumber} Calculate: } ${num1} \\times 2`;
                     break;
-                case 'addition4':
-                    num1 = Math.floor(Math.random() * 9000) + 1000; // 4-digit
-                    num2 = Math.floor(Math.random() * 9000) + 1000; // 4-digit
-                    answer = num1 + num2;
-                    operation = '+';
-                    break;
-                case 'subtraction4':
-                    num1 = Math.floor(Math.random() * 9000) + 1000; // 4-digit
-                    num2 = Math.floor(Math.random() * num1); // Ensure positive result
-                    answer = num1 - num2;
-                    operation = '-';
-                    break;
-                case 'multiplication2':
-                    num1 = Math.floor(Math.random() * 90) + 10; // 2-digit
-                    num2 = Math.floor(Math.random() * 90) + 10; // 2-digit
-                    answer = num1 * num2;
-                    operation = '×';
+                    
+                case 'squaresCubes':
+                    questionNumber = totalQuestions + 1;
+                    const isCube = Math.random() < 0.5;
+                    let num = Math.floor(Math.random() * 15) + 1;
+                    
+                    if (isCube) {
+                        answer = num * num * num;
+                        display = `\\text{Q.${questionNumber} Calculate: } ${num}^3`;
+                    } else {
+                        answer = num * num;
+                        display = `\\text{Q.${questionNumber} Calculate: } ${num}^2`;
+                    }
                     break;
             }
             
-            return {
-                num1,
-                num2,
-                answer,
-                operation,
-                display: `${num1} ${operation} ${num2} = ?`
-            };
+            // Round answer to reasonable decimal places for fractions
+            if (!Number.isInteger(answer)) {
+                answer = Math.round(answer * 100) / 100;
+            }
+            
+            return { answer, display };
         }
 
         // Show next problem
         function nextProblem() {
+            if (!currentPracticeType) {
+                alert('Please select a practice type first!');
+                return;
+            }
+            
+            stopTimer();
             currentProblem = generateProblem();
-            document.getElementById('problemDisplay').textContent = currentProblem.display;
+            
+            // Render LaTeX
+            const problemDiv = document.getElementById('problemDisplay');
+            problemDiv.innerHTML = '';
+            
+            try {
+                katex.render(currentProblem.display, problemDiv, {
+                    throwOnError: false,
+                    displayMode: true
+                });
+            } catch (e) {
+                console.error('LaTeX rendering error:', e);
+                problemDiv.textContent = currentProblem.display.replace(/\\text\{|\}|\\times|\\sqrt|\\frac|\{|\}/g, '');
+            }
+            
             document.getElementById('answerInput').style.display = 'inline-block';
             document.getElementById('checkBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').textContent = 'Next Question';
             document.getElementById('answerInput').value = '';
             document.getElementById('answerInput').focus();
             document.getElementById('feedback').style.display = 'none';
             answered = false;
+            
+            startTimer();
         }
 
         // Check answer
         function checkAnswer() {
             if (answered) return;
             
-            const userAnswer = parseInt(document.getElementById('answerInput').value);
+            stopTimer();
+            const userAnswer = parseFloat(document.getElementById('answerInput').value);
             const feedback = document.getElementById('feedback');
+            const timeTaken = currentQuestionTime;
             
             totalQuestions++;
             answered = true;
             
-            if (userAnswer === currentProblem.answer) {
+            // Allow small tolerance for decimal answers
+            const tolerance = 0.01;
+            const isCorrect = Math.abs(userAnswer - currentProblem.answer) <= tolerance;
+            
+            if (isCorrect) {
                 score++;
-                feedback.textContent = '🎉 Correct! Well done!';
+                feedback.textContent = `🎉 Correct! Answer: ${currentProblem.answer} | Time: ${timeTaken.toFixed(1)}s`;
                 feedback.className = 'feedback correct';
             } else {
-                feedback.textContent = `❌ Incorrect. The correct answer is ${currentProblem.answer}`;
+                feedback.textContent = `❌ Incorrect. Correct answer: ${currentProblem.answer} | Your answer: ${userAnswer} | Time: ${timeTaken.toFixed(1)}s`;
                 feedback.className = 'feedback incorrect';
             }
             
             feedback.style.display = 'block';
             updateScore();
+            
+            // Hide input and check button, show next button
+            document.getElementById('answerInput').style.display = 'none';
+            document.getElementById('checkBtn').style.display = 'none';
         }
 
         // Update score display
@@ -522,14 +819,12 @@
             document.getElementById('accuracy').textContent = accuracy + '%';
         }
 
-        // Handle Enter key press in answer input
+        // Handle Enter key press
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('answerInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     if (!answered) {
                         checkAnswer();
-                    } else {
-                        nextProblem();
                     }
                 }
             });
